@@ -1,0 +1,127 @@
+DefineVariables
+	Text            [ProductName]           := The Real Deal
+	Text            [ItemName]              := The Real Deal
+	Text            [MainExeName]           := REALDEAL.EXE
+	Text            [ProductIniFile]        := REALDEAL.INI
+	Text            [ProgGrpName]           := The Real Deal
+	Text            [ProgGrpFileName]       := THEREALD.GRP
+	Text            [Language]              := English
+	Number          [Continue]              := 1011
+
+	Text            [AreYouSureText]        := Are you sure you wish to completely remove the selected application and all it's components? 
+	Text            [ReadyToDeleteText]     := Ready to delete all files in
+	Text            [YES_text]              := Yes
+	Text            [NO_text]               := No
+	Text            [DelteingFilesText]     := Please wait...
+	Text            [UninstallText]         := Uninstall
+
+	Logical         [IsWin95]               := N
+	Logical         [IsWinNT]               := N
+EndDefineVariables
+
+SetDefaultBitmap Off
+SetInstallModeTo Install
+SetTraceMode Off
+SetExitConfirmationPrompt off
+SetPopupBorderTo double
+SetReplacementInquiry Off
+SetBackgroundColor 10 200 10 10 200 10 
+
+Do WhichWindows
+Do SetInstallDir
+SetTopLineTo [ProductName] [UninstallText]
+ShowWindow Maximize
+Do CheckIfSure
+SoLong Quietly
+
+Procedure WhichWindows
+  If WIN32
+	 If WindowsVersion >= 3.95
+	   [IsWin95] := Y
+	 Else
+	   If WindowsVersion >= 3.10
+	      [IsWinNT] := Y
+	      [IsWin95] := N ;; Windows NT 3.50 or greater ONLY!!!
+	   EndIf
+	 Endif
+  Else
+	 [IsWin95] := N   ;; Win31
+  EndIf
+EndProcedure
+
+
+Procedure SetInstallDir
+	[Number1] := LengthOf [InstallFromDirectory]
+	DecrementNumber [Number1]
+	[String1] := SubstringOf [InstallFromDirectory] from Beginning to [Number1]
+	[InstallationDirectory] := [String1]
+
+EndProcedure
+
+Procedure UNINSTALL
+		If DirectoryExists [InstallationDirectory]
+			TextBox BlackOnLightGray
+			[DelteingFilesText]
+			EndTextBox
+			If DirectoryExists [InstallationDirectory]\BITMAPS
+			  DeleteFiles from [InstallationDirectory]\BITMAPS
+				*.*
+			  EndDeleteFiles
+			  DeleteDirectory [InstallationDirectory]\BITMAPS
+			EndIf
+
+			If DirectoryExists [InstallationDirectory]\MUSIC
+			  DeleteFiles from [InstallationDirectory]\MUSIC
+				*.*
+			  EndDeleteFiles
+			  DeleteDirectory [InstallationDirectory]\MUSIC
+			EndIf
+
+			If [IsWin95]
+			  Run [InstallationDirectory]\REGISTRY.EXE [InstallationDirectory]\UREAL.RGS
+			EndIf
+
+			DeleteFiles from [InstallationDirectory]
+				*.*
+			EndDeleteFiles
+			DeleteDirectory [InstallationDirectory]
+
+			If [IsWin95]
+			     If DirectoryExists [WindowsDirectory]\STARTM~1\PROGRAMS\THEREA~1
+				ProgramManagerDDE
+				DeleteGroup([ProgGrpName])
+				EndProgramManagerDDE
+			     EndIf
+			Else
+			     If [IsWinNT]
+				ProgramManagerDDE
+				DeleteGroup([ProgGrpName])
+				EndProgramManagerDDE
+			     Else
+				If FileExists [WindowsDirectory]\[ProgGrpFileName]
+				  ProgramManagerDDE
+				  DeleteGroup([ProgGrpName])
+				  EndProgramManagerDDE
+				EndIf
+			     EndIf
+			EndIf
+		EndIf
+EndProcedure
+
+Procedure CheckIfSure
+  DialogBox 200 60 UseHeader "The Real Deal" Returns [Continue] BlackOnLightGray ModalFrame
+    CText @xy(0,10) 200 70 [AreYouSureText]
+    DefPushButton @xy( 30, 35) 40 16 [YES_text] 1012
+    PushButton @xy(125, 35) 40 16 [NO_text] 1011
+  EndDialogBox
+  
+ ClearScreen
+
+ if [Continue] = 1012
+  Do UNINSTALL
+ Else
+  SoLong
+ EndIf
+EndProcedure
+
+EndScript

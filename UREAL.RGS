@@ -1,0 +1,9 @@
+BEGIN REGISTRY
+RegDeleteKey( HKEY_CLASSES_ROOT, "RealDeal" );
+RegDeleteKey( HKEY_LOCAL_MACHINE, "SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\REALDEAL.EXE" );
+// This removes the uninstaller components from the registry
+RegDeleteKey( HKEY_LOCAL_MACHINE, "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\RealDeal" );
+// Remove the Mindscape product entry
+RegDeleteKeyPath( HKEY_LOCAL_MACHINE, "SOFTWARE\Mindscape\The Real Deal\Version 1.0.0" );
+RegDeleteKeyPath( HKEY_CURRENT_USER, "Software\Mindscape\TheRealDeal" );
+END REGISTRY
